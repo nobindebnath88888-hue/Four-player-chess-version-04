@@ -586,7 +586,7 @@ input[type=text]:focus{border-color:#b8860b;box-shadow:0 0 10px rgba(180,140,50,
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getDatabase,ref,set,get,push,onValue,update,remove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const FB={ 
+const FB={
   apiKey: "AIzaSyCi8cZYVN6gpZRRSMx2qVHKBRRVQZmdWw4",
   authDomain: "analyticalchess.firebaseapp.com",
   databaseURL: "https://analyticalchess-default-rtdb.firebaseio.com",
@@ -695,21 +695,25 @@ let _boardThemeIdx = 0; // default: Glass
 function initBoard(){
   const b=Array(64).fill(null);
   const P=(r,c,t,co)=>{b[r*8+c]={type:t,color:co}};
-  // Diagonal teams:
-  //   Team A: red (Black, bottom-left) + gold (Gold, top-right)
-  //   Team B: blue (White, top-left)   + green (Red, bottom-right)
-  //
-  // Black  bottom-left : R(7,0) N(7,1) B(7,2) K(7,3)  King col3, Rook col0
-  P(7,0,'R','red');  P(7,1,'N','red');  P(7,2,'B','red');  P(7,3,'K','red');
+  // Diagonal teams — kings at OUTER corners so enemy kings are far apart:
+  //   BL Black: K(0) B(1) N(2) R(3)  King at col0 (outer-left)
+  //   BR Red:   R(4) N(5) B(6) K(7)  King at col7 (outer-right)
+  //   TL White: K(0) B(1) N(2) R(3)  King at col0 (outer-left)
+  //   TR Gold:  R(4) N(5) B(6) K(7)  King at col7 (outer-right)
+  // Enemy kings (BL vs BR, TL vs TR) are 7 squares apart ✓
+  // Ally kings (BL+TR, TL+BR) are diagonal — max distance ✓
+
+  // Black — bottom-left
+  P(7,0,'K','red');  P(7,1,'B','red');  P(7,2,'N','red');  P(7,3,'R','red');
   for(let c=0;c<4;c++) P(6,c,'P','red');
-  // Green  bottom-right: K(7,4) B(7,5) N(7,6) R(7,7)  King col4, Rook col7
-  P(7,4,'K','green'); P(7,5,'B','green'); P(7,6,'N','green'); P(7,7,'R','green');
+  // Red — bottom-right
+  P(7,4,'R','green'); P(7,5,'N','green'); P(7,6,'B','green'); P(7,7,'K','green');
   for(let c=4;c<8;c++) P(6,c,'P','green');
-  // Blue   top-left    : R(0,0) N(0,1) B(0,2) K(0,3)  King col3, Rook col0
-  P(0,0,'R','blue'); P(0,1,'N','blue'); P(0,2,'B','blue'); P(0,3,'K','blue');
+  // White — top-left
+  P(0,0,'K','blue'); P(0,1,'B','blue'); P(0,2,'N','blue'); P(0,3,'R','blue');
   for(let c=0;c<4;c++) P(1,c,'P','blue');
-  // Gold   top-right   : K(0,4) B(0,5) N(0,6) R(0,7)  King col4, Rook col7
-  P(0,4,'K','gold'); P(0,5,'B','gold'); P(0,6,'N','gold'); P(0,7,'R','gold');
+  // Gold — top-right
+  P(0,4,'R','gold'); P(0,5,'N','gold'); P(0,6,'B','gold'); P(0,7,'K','gold');
   for(let c=4;c<8;c++) P(1,c,'P','gold');
   return b;
 }
@@ -799,11 +803,11 @@ function genMoves(board,row,col,color,cr){
   }
   else if(pc.type==='K'){
     [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc])=>step(dr,dc));
-    // Castling: king moves 2 squares toward the rook
-    // Red/Gold: King on left (col0 or col0), Rook toward right (col3) — king moves RIGHT (+col)
-    // Blue/Green: King on right (col7), Rook toward left (col4) — king moves LEFT (-col)
+    // Castling: king moves 2 toward its Rook
+    // Black/White (K at col0): king moves RIGHT (+1) toward Rook at col3
+    // Gold/Red    (K at col7): king moves LEFT  (-1) toward Rook at col4
     if(cr&&cr[color]&&cr[color].K){
-      const dir=(color==='red'||color==='blue')?-1:1; // Red/Blue king at col3 castles LEFT; Gold/Green king at col4 castles RIGHT
+      const dir=(color==='red'||color==='blue')?1:-1;
       const sq1=col+dir, sq2=col+dir*2, rookCol=col+dir*3;
       const inBounds=(c)=>c>=0&&c<=7;
       if(inBounds(sq1)&&inBounds(sq2)&&inBounds(rookCol)){
@@ -836,7 +840,11 @@ function updateCR(cr,move,board){
   const[fr,fc]=move.from;const p=board[fr*8+fc];
   if(!p)return n;
   if(p.type==='K')n[p.color]={K:false,Q:false};
-  if(p.type==='R'){if(fc>4)n[p.color].K=false;else n[p.color].Q=false;}
+  if(p.type==='R'){
+    // K-castling rook: col3 for left players (red/blue), col4 for right players (green/gold)
+    if((p.color==='red'||p.color==='blue')&&fc===3)  n[p.color].K=false;
+    if((p.color==='green'||p.color==='gold')&&fc===4) n[p.color].K=false;
+  }
   return n;
 }
 
