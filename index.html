@@ -587,13 +587,14 @@ import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-ap
 import{getDatabase,ref,set,get,push,onValue,update,remove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const FB={
-  apiKey: "AIzaSyCi8cZYVN6gpZRRSMx2qVHKBRRVQZmdWw4",
-  authDomain: "analyticalchess.firebaseapp.com",
-  databaseURL: "https://analyticalchess-default-rtdb.firebaseio.com",
-  projectId: "analyticalchess",
-  storageBucket: "analyticalchess.firebasestorage.app",
-  messagingSenderId: "1068006653983",
-  appId: "1:1068006653983:web:0caa2492e825e94ada552a"
+  apiKey:"AIzaSyBwcon6mrr7AV-CZ5a82bbe2UaNvZRcyNk",
+  authDomain:"chess-versions.firebaseapp.com",
+  databaseURL:"https://chess-versions-default-rtdb.firebaseio.com",
+  projectId:"chess-versions",
+  storageBucket:"chess-versions.firebasestorage.app",
+  messagingSenderId:"619354635025",
+  appId:"1:619354635025:web:bd79e95b107f91afee2ab0",
+  measurementId:"G-R4CHF2K3YM"
 };
 
 // ── Constants ─────────────────────────────────────────────────────
@@ -695,25 +696,21 @@ let _boardThemeIdx = 0; // default: Glass
 function initBoard(){
   const b=Array(64).fill(null);
   const P=(r,c,t,co)=>{b[r*8+c]={type:t,color:co}};
-  // Diagonal teams — kings at OUTER corners so enemy kings are far apart:
-  //   BL Black: K(0) B(1) N(2) R(3)  King at col0 (outer-left)
-  //   BR Red:   R(4) N(5) B(6) K(7)  King at col7 (outer-right)
-  //   TL White: K(0) B(1) N(2) R(3)  King at col0 (outer-left)
-  //   TR Gold:  R(4) N(5) B(6) K(7)  King at col7 (outer-right)
-  // Enemy kings (BL vs BR, TL vs TR) are 7 squares apart ✓
-  // Ally kings (BL+TR, TL+BR) are diagonal — max distance ✓
-
-  // Black — bottom-left
-  P(7,0,'K','red');  P(7,1,'B','red');  P(7,2,'N','red');  P(7,3,'R','red');
+  // Diagonal teams — same 4×4 corner layout as original, gold↔green swapped:
+  //   Team A (diagonal): red (Black, BL) + gold (Gold, TR)
+  //   Team B (diagonal): blue (White, TL) + green (Red, BR)
+  //
+  // Red   (Black) bottom-left : R N B K  — King col3
+  P(7,0,'R','red');  P(7,1,'N','red');  P(7,2,'B','red');  P(7,3,'K','red');
   for(let c=0;c<4;c++) P(6,c,'P','red');
-  // Red — bottom-right
-  P(7,4,'R','green'); P(7,5,'N','green'); P(7,6,'B','green'); P(7,7,'K','green');
+  // Green (Red)   bottom-right: K B N R  — King col4
+  P(7,4,'K','green'); P(7,5,'B','green'); P(7,6,'N','green'); P(7,7,'R','green');
   for(let c=4;c<8;c++) P(6,c,'P','green');
-  // White — top-left
-  P(0,0,'K','blue'); P(0,1,'B','blue'); P(0,2,'N','blue'); P(0,3,'R','blue');
+  // Blue  (White) top-left    : R N B K  — King col3
+  P(0,0,'R','blue'); P(0,1,'N','blue'); P(0,2,'B','blue'); P(0,3,'K','blue');
   for(let c=0;c<4;c++) P(1,c,'P','blue');
-  // Gold — top-right
-  P(0,4,'R','gold'); P(0,5,'N','gold'); P(0,6,'B','gold'); P(0,7,'K','gold');
+  // Gold  (Gold)  top-right   : K B N R  — King col4
+  P(0,4,'K','gold'); P(0,5,'B','gold'); P(0,6,'N','gold'); P(0,7,'R','gold');
   for(let c=4;c<8;c++) P(1,c,'P','gold');
   return b;
 }
@@ -803,11 +800,11 @@ function genMoves(board,row,col,color,cr){
   }
   else if(pc.type==='K'){
     [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc])=>step(dr,dc));
-    // Castling: king moves 2 toward its Rook
-    // Black/White (K at col0): king moves RIGHT (+1) toward Rook at col3
-    // Gold/Red    (K at col7): king moves LEFT  (-1) toward Rook at col4
+    // Castling: king moves 2 squares toward the rook
+    // Red/Gold: King on left (col0 or col0), Rook toward right (col3) — king moves RIGHT (+col)
+    // Blue/Green: King on right (col7), Rook toward left (col4) — king moves LEFT (-col)
     if(cr&&cr[color]&&cr[color].K){
-      const dir=(color==='red'||color==='blue')?1:-1;
+      const dir=(color==='red'||color==='blue')?-1:1; // Red/Blue king at col3 castles LEFT; Gold/Green king at col4 castles RIGHT
       const sq1=col+dir, sq2=col+dir*2, rookCol=col+dir*3;
       const inBounds=(c)=>c>=0&&c<=7;
       if(inBounds(sq1)&&inBounds(sq2)&&inBounds(rookCol)){
@@ -840,11 +837,7 @@ function updateCR(cr,move,board){
   const[fr,fc]=move.from;const p=board[fr*8+fc];
   if(!p)return n;
   if(p.type==='K')n[p.color]={K:false,Q:false};
-  if(p.type==='R'){
-    // K-castling rook: col3 for left players (red/blue), col4 for right players (green/gold)
-    if((p.color==='red'||p.color==='blue')&&fc===3)  n[p.color].K=false;
-    if((p.color==='green'||p.color==='gold')&&fc===4) n[p.color].K=false;
-  }
+  if(p.type==='R'){if(fc>4)n[p.color].K=false;else n[p.color].Q=false;}
   return n;
 }
 
@@ -1152,7 +1145,7 @@ document.getElementById('jb').addEventListener('click',doJoin);
 ['ni','ri'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doJoin();}));
 
 async function doJoin(){
-  if(!db2){setStat('❌ Firebase not initialised — check console.');return;}
+  if(!db2){setStat('❌ Firebase not initialised.');return;}
   const name=document.getElementById('ni').value.trim();
   if(!name){setStat('Enter your name!');return;}
   const color=document.querySelector('.cc.sel')?.dataset?.color;
@@ -1161,18 +1154,11 @@ async function doJoin(){
   let rid=document.getElementById('ri').value.trim().toUpperCase();
   if(!rid)rid=Math.random().toString(36).substring(2,8).toUpperCase();
   setStat('Connecting…');
-
   let done=false;
-  const tmr=setTimeout(()=>{
-    if(done)return; done=true;
-    setStat('❌ Timed out — check your internet or Firebase Rules.');
-    stat.style.color='#e74c3c';
-  },12000);
-
+  const tmr=setTimeout(()=>{if(done)return;done=true;setStat('❌ Timed out — check Firebase Rules (.read/.write = true).');stat.style.color='#e74c3c';},12000);
   try{
     const snap=await get(ref(db2,`rooms/${rid}`));
     if(!done){done=true;clearTimeout(tmr);}else return;
-
     if(!snap.exists()){
       const TIMER_MS=300000;
       const boardArr=initBoard();
@@ -1191,21 +1177,14 @@ async function doJoin(){
       setStat('✓ Room created! Share ID: '+rid);
     }else{
       const ex=snap.val();
-      if(ex.players?.[myColor]?.name&&ex.players[myColor].name!==myName){
-        setStat('⚠ Colour '+myColor+' is taken — choose another.');return;
-      }
+      if(ex.players?.[myColor]?.name&&ex.players[myColor].name!==myName){setStat('⚠ Colour taken — choose another.');return;}
       await update(ref(db2,`rooms/${rid}/players/${myColor}`),{name:myName,online:true});
       setStat('✓ Joined room '+rid+'!');
     }
     roomId=rid;setTimeout(enterGame,600);
   }catch(err){
-    clearTimeout(tmr);
-    console.error('doJoin error:',err);
-    const m=err?.message||String(err);
-    if(m.toLowerCase().includes('permission')){
-      setStat('❌ Permission denied — set Firebase Rules .read/.write to true.');
-    }else{setStat('❌ '+m);}
-    stat.style.color='#e74c3c';
+    clearTimeout(tmr);console.error(err);
+    setStat('❌ '+(err?.message||String(err)));stat.style.color='#e74c3c';
   }
 }
 function setStat(m){stat.textContent=m;stat.style.color='#b8860b';}
@@ -1299,7 +1278,7 @@ function paint(){
 // Corner name mapping: which colour appears at each display corner
 // for each perspective.  Format: {tl, tr, bl, br}
 const CORNER_CLASS={red:'black-p',blue:'white-p',green:'silver-p',gold:'gold-p'};
-// New layout: red=BL, green=BR, blue=TL, gold=TR
+// New layout: red=BL, green=BR, blue=TL, gold=TR (diagonal teams)
 const PERSP_CORNERS={
   red:  {tl:'blue',  tr:'gold',  bl:'red',   br:'green'},
   green:{tl:'gold',  tr:'blue',  bl:'green', br:'red'},
@@ -1538,7 +1517,6 @@ async function commitMove(move,promo){
 
     const boardObj={};
     newBoard.forEach((v,i)=>{if(v!==null)boardObj[String(i)]=v;});
-
     await update(ref(db2,`rooms/${roomId}`),{
       board:boardObj,
       currentTurn:winner?null:nextColor,
@@ -1552,7 +1530,6 @@ async function commitMove(move,promo){
       gameStarted:true,
       captures:newCaptures,
     });
-    // Store board snapshot for move history
     const boardSnap={};
     newBoard.forEach((p,i)=>{if(p)boardSnap[String(i)]={type:p.type,color:p.color};});
     await push(ref(db2,`rooms/${roomId}/moveLog`),{
