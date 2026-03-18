@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Strategy Hub — Four Player Chess</title>
+<title>Strategy Hub — Diagonal Teams Chess</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -178,37 +178,38 @@ input[type=text]:focus{border-color:#b8860b;box-shadow:0 0 10px rgba(180,140,50,
   position:fixed;
   top:50%;left:50%;
   transform:translate(-50%,-50%) scale(0.85);
-  background:rgba(6,12,26,.92);
-  border:1px solid rgba(180,140,50,.45);
-  border-radius:12px;
-  padding:14px 22px;
+  background:rgba(6,12,26,.95);
+  border:2px solid rgba(180,140,50,.6);
+  border-radius:14px;
+  padding:18px 28px;
   text-align:center;
   pointer-events:none;
-  z-index:120;
+  z-index:9999;
   opacity:0;
-  transition:opacity .3s ease, transform .3s ease;
-  min-width:220px;
-  max-width:88%;
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
+  transition:opacity .35s ease, transform .35s ease;
+  min-width:240px;
+  max-width:90vw;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 8px 32px rgba(0,0,0,.8);
 }
 #board-notif.show{
   opacity:1;
   transform:translate(-50%,-50%) scale(1);
-  z-index:400;
 }
 #board-notif .bn-title{
   font-family:'Cinzel',serif;
-  font-size:15px;
+  font-size:18px;
   font-weight:700;
   letter-spacing:.12em;
   color:#ffe680;
-  margin-bottom:4px;
+  margin-bottom:6px;
+  text-shadow:0 0 12px rgba(255,200,0,.5);
 }
 #board-notif .bn-sub{
   font-family:'Cinzel',serif;
-  font-size:11px;
-  color:#a0b8c8;
+  font-size:13px;
+  color:#c8dde8;
   letter-spacing:.07em;
   line-height:1.5;
 }
@@ -429,7 +430,7 @@ input[type=text]:focus{border-color:#b8860b;box-shadow:0 0 10px rgba(180,140,50,
    <div>
     <div class="crown">&#9819;</div>
     <h1 class="gtitle">STRATEGY HUB</h1>
-    <p class="gsub">Four Kings &middot; Two Teams &middot; One Board</p>
+    <p class="gsub">Diagonal Alliances &middot; Two Teams &middot; One Board</p>
    </div>
    <div class="lcard">
     <input type="text" id="ni" placeholder="Your name&hellip;" maxlength="20"/>
@@ -441,9 +442,9 @@ input[type=text]:focus{border-color:#b8860b;box-shadow:0 0 10px rgba(180,140,50,
      <div class="cc" data-color="gold"  style="--c:#e8900a"><div class="csw"></div><span>Gold</span></div>
     </div>
     <div class="tbox">
-     <div class="tb ta"><span class="tl">&#9876; TEAM A</span><span class="tm">Black + Gold ▼</span></div>
+     <div class="tb ta"><span class="tl">&#9876; TEAM A</span><span class="tm">Black &#8601; + Gold &#8599;</span></div>
      <div class="vsd">VS</div>
-     <div class="tb tb2"><span class="tl">&#9876; TEAM B</span><span class="tm">White + Red ▲</span></div>
+     <div class="tb tb2"><span class="tl">&#9876; TEAM B</span><span class="tm">White &#8598; + Red &#8600;</span></div>
     </div>
     <div class="rsec">
      <input type="text" id="ri" placeholder="Room ID (blank = create new)"/>
@@ -473,13 +474,13 @@ input[type=text]:focus{border-color:#b8860b;box-shadow:0 0 10px rgba(180,140,50,
     <div class="turnorder">
      <div class="to-title">Turn Order</div>
      <div class="to-row">
-      <div class="to-dot red"></div><span class="to-name">Black</span>
+      <div class="to-dot red"></div><span class="to-name">Black &#8601;</span>
       <span class="to-sep">&#8594;</span>
-      <div class="to-dot blue"></div><span class="to-name">White</span>
+      <div class="to-dot blue"></div><span class="to-name">White &#8598;</span>
       <span class="to-sep">&#8594;</span>
-      <div class="to-dot gold"></div><span class="to-name">Gold</span>
+      <div class="to-dot gold"></div><span class="to-name">Gold &#8599;</span>
       <span class="to-sep">&#8594;</span>
-      <div class="to-dot green"></div><span class="to-name">Red</span>
+      <div class="to-dot green"></div><span class="to-name">Red &#8600;</span>
       <span class="to-sep">&#8594;</span><span class="to-name" style="color:#506080">repeat</span>
      </div>
     </div>
@@ -585,14 +586,14 @@ input[type=text]:focus{border-color:#b8860b;box-shadow:0 0 10px rgba(180,140,50,
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getDatabase,ref,set,get,push,onValue,update,remove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const FB={
-   apiKey: "AIzaSyCi8cZYVN6gpZRRSMx2qVHKBRRVQZmdWw4",
-    authDomain: "analyticalchess.firebaseapp.com",
-    databaseURL: "https://analyticalchess-default-rtdb.firebaseio.com",
-    projectId: "analyticalchess",
-    storageBucket: "analyticalchess.firebasestorage.app",
-    messagingSenderId: "1068006653983",
-    appId: "1:1068006653983:web:0caa2492e825e94ada552a"
+const FB={ 
+  apiKey: "AIzaSyCi8cZYVN6gpZRRSMx2qVHKBRRVQZmdWw4",
+  authDomain: "analyticalchess.firebaseapp.com",
+  databaseURL: "https://analyticalchess-default-rtdb.firebaseio.com",
+  projectId: "analyticalchess",
+  storageBucket: "analyticalchess.firebasestorage.app",
+  messagingSenderId: "1068006653983",
+  appId: "1:1068006653983:web:0caa2492e825e94ada552a"
 };
 
 // ── Constants ─────────────────────────────────────────────────────
@@ -603,9 +604,9 @@ const TEAMS={red:'A',gold:'A',blue:'B',green:'B'};
 // Index into this array gives turn order, skipping eliminated players
 const TURN_ORDER=['red','blue','gold','green'];
 
-const PAWN_DIR  ={red:-1,blue:1, green:1,gold:-1};
-const PAWN_PROMO={red:0,  blue:7, green:7,gold:0};
-const PAWN_START={red:6,  blue:1, green:1,gold:6};
+const PAWN_DIR  ={red:-1,blue:1, green:-1,gold:1};
+const PAWN_PROMO={red:0,  blue:7, green:0, gold:7};
+const PAWN_START={red:6,  blue:1, green:6, gold:1};
 
 // King starting squares for castling reference
 // Red: King at (7,3), Rooks at (7,0) [already Boat] and... wait —
@@ -692,66 +693,27 @@ let _boardThemeIdx = 0; // default: Glass
 // Now Red King col0, Blue King col7 — far apart. Allied kings won't be adjacent.
 // Castling: each king moves 2 toward its Rook (king-side = toward center in this layout)
 function initBoard(){
-  const b = Array(64).fill(null);
-  const P = (r,c,t,co) => { b[r*8+c] = {type:t,color:co}; };
-
-  // =========================
-  // TOP LEFT → WHITE
-  // =========================
-  P(0,0,'K','white');
-  P(0,1,'N','white');
-  P(0,2,'B','white');
-  P(0,3,'Q','white');
-
-  P(1,0,'P','white');
-  P(1,1,'P','white');
-  P(1,2,'P','white');
-  P(1,3,'P','white');
-
-
-  // =========================
-  // TOP RIGHT → GOLD
-  // =========================
-  P(0,4,'Q','gold');
-  P(0,5,'B','gold');   // ✅ FIXED: bishop explicitly placed
-  P(0,6,'N','gold');
-  P(0,7,'K','gold');
-
-  P(1,4,'P','gold');
-  P(1,5,'P','gold');
-  P(1,6,'P','gold');
-  P(1,7,'P','gold');
-
-
-  // =========================
-  // BOTTOM LEFT → BLACK
-  // =========================
-  P(6,0,'P','black');
-  P(6,1,'P','black');
-  P(6,2,'P','black');
-  P(6,3,'P','black');
-
-  P(7,0,'K','black');
-  P(7,1,'N','black');
-  P(7,2,'B','black');
-  P(7,3,'Q','black');
-
-
-  // =========================
-  // BOTTOM RIGHT → RED
-  // =========================
-  P(6,4,'P','red');
-  P(6,5,'P','red');
-  P(6,6,'P','red');
-  P(6,7,'P','red');
-
-  P(7,4,'Q','red');
-  P(7,5,'B','red');
-  P(7,6,'N','red');
-  P(7,7,'K','red');
-
+  const b=Array(64).fill(null);
+  const P=(r,c,t,co)=>{b[r*8+c]={type:t,color:co}};
+  // Diagonal teams:
+  //   Team A: red (Black, bottom-left) + gold (Gold, top-right)
+  //   Team B: blue (White, top-left)   + green (Red, bottom-right)
+  //
+  // Black  bottom-left : R(7,0) N(7,1) B(7,2) K(7,3)  King col3, Rook col0
+  P(7,0,'R','red');  P(7,1,'N','red');  P(7,2,'B','red');  P(7,3,'K','red');
+  for(let c=0;c<4;c++) P(6,c,'P','red');
+  // Green  bottom-right: K(7,4) B(7,5) N(7,6) R(7,7)  King col4, Rook col7
+  P(7,4,'K','green'); P(7,5,'B','green'); P(7,6,'N','green'); P(7,7,'R','green');
+  for(let c=4;c<8;c++) P(6,c,'P','green');
+  // Blue   top-left    : R(0,0) N(0,1) B(0,2) K(0,3)  King col3, Rook col0
+  P(0,0,'R','blue'); P(0,1,'N','blue'); P(0,2,'B','blue'); P(0,3,'K','blue');
+  for(let c=0;c<4;c++) P(1,c,'P','blue');
+  // Gold   top-right   : K(0,4) B(0,5) N(0,6) R(0,7)  King col4, Rook col7
+  P(0,4,'K','gold'); P(0,5,'B','gold'); P(0,6,'N','gold'); P(0,7,'R','gold');
+  for(let c=4;c<8;c++) P(1,c,'P','gold');
   return b;
 }
+
 // Castling rights per color: K=king-side (toward centre), Q=queen-side (away from centre)
 // Given the layout above:
 //   Red:   King at col0, Rook at col3 — castling moves king RIGHT (king-side, toward rook)
@@ -961,16 +923,16 @@ function deserCR(raw){
 // d2b: display coords → board coords
 function b2d(r,c,p){
   if(p==='red')   return [r,   c  ];   // bottom-left  identity
-  if(p==='gold')  return [r,   7-c];   // bottom-right mirror cols
+  if(p==='green') return [r,   7-c];   // bottom-right mirror cols
   if(p==='blue')  return [7-r, c  ];   // top-left     flip rows
-  if(p==='green') return [7-r, 7-c];   // top-right    rotate 180
+  if(p==='gold')  return [7-r, 7-c];  // top-right    rotate 180
   return [r,c];
 }
 function d2b(dr,dc,p){
   if(p==='red')   return [dr,   dc  ];
-  if(p==='gold')  return [dr,   7-dc];
+  if(p==='green') return [dr,   7-dc];
   if(p==='blue')  return [7-dr, dc  ];
-  if(p==='green') return [7-dr, 7-dc];
+  if(p==='gold')  return [7-dr, 7-dc];
   return [dr,dc];
 }
 
@@ -1182,38 +1144,61 @@ document.getElementById('jb').addEventListener('click',doJoin);
 ['ni','ri'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doJoin();}));
 
 async function doJoin(){
-  if(!db2){setStat('Firebase not ready!');return;}
+  if(!db2){setStat('❌ Firebase not initialised — check console.');return;}
   const name=document.getElementById('ni').value.trim();
   if(!name){setStat('Enter your name!');return;}
   const color=document.querySelector('.cc.sel')?.dataset?.color;
-  if(!color){setStat('Choose a color!');return;}
+  if(!color){setStat('Choose a colour!');return;}
   myName=name;myColor=color;perspective=color;
   let rid=document.getElementById('ri').value.trim().toUpperCase();
   if(!rid)rid=Math.random().toString(36).substring(2,8).toUpperCase();
-  setStat('Connecting...');
+  setStat('Connecting…');
+
+  let done=false;
+  const tmr=setTimeout(()=>{
+    if(done)return; done=true;
+    setStat('❌ Timed out — check your internet or Firebase Rules.');
+    stat.style.color='#e74c3c';
+  },12000);
+
   try{
     const snap=await get(ref(db2,`rooms/${rid}`));
+    if(!done){done=true;clearTimeout(tmr);}else return;
+
     if(!snap.exists()){
-      const TIMER_MS=300000; // 5 minutes per player
+      const TIMER_MS=300000;
+      const boardArr=initBoard();
+      const boardObj={};
+      boardArr.forEach((v,i)=>{if(v!==null)boardObj[String(i)]=v;});
       await set(ref(db2,`rooms/${rid}`),{
-        board:initBoard(),
+        board:boardObj,
         currentTurn:'red',turnIndex:0,
         castlingRights:initCastlingRights(),
         eliminated:null,lastMove:null,winner:null,
         players:{[myColor]:{name:myName,online:true}},
         timers:{red:TIMER_MS,blue:TIMER_MS,green:TIMER_MS,gold:TIMER_MS},
-        turnStartedAt:null, gameStarted:false,
+        turnStartedAt:null,gameStarted:false,
         createdAt:Date.now()
       });
-      setStat('Room created! Share ID: '+rid);
+      setStat('✓ Room created! Share ID: '+rid);
     }else{
       const ex=snap.val();
-      if(ex.players?.[myColor]?.name&&ex.players[myColor].name!==myName){setStat('Color '+myColor+' is taken!');return;}
+      if(ex.players?.[myColor]?.name&&ex.players[myColor].name!==myName){
+        setStat('⚠ Colour '+myColor+' is taken — choose another.');return;
+      }
       await update(ref(db2,`rooms/${rid}/players/${myColor}`),{name:myName,online:true});
-      setStat('Joined room '+rid+'!');
+      setStat('✓ Joined room '+rid+'!');
     }
     roomId=rid;setTimeout(enterGame,600);
-  }catch(err){console.error(err);setStat('Failed: '+err.message);stat.style.color='#e74c3c';}
+  }catch(err){
+    clearTimeout(tmr);
+    console.error('doJoin error:',err);
+    const m=err?.message||String(err);
+    if(m.toLowerCase().includes('permission')){
+      setStat('❌ Permission denied — set Firebase Rules .read/.write to true.');
+    }else{setStat('❌ '+m);}
+    stat.style.color='#e74c3c';
+  }
 }
 function setStat(m){stat.textContent=m;stat.style.color='#b8860b';}
 
@@ -1306,14 +1291,12 @@ function paint(){
 // Corner name mapping: which colour appears at each display corner
 // for each perspective.  Format: {tl, tr, bl, br}
 const CORNER_CLASS={red:'black-p',blue:'white-p',green:'silver-p',gold:'gold-p'};
-// Board corners per perspective after new layout:
-//   red(bottom-left) gold(bottom-right) blue(top-left) green(top-right)
-// For each perspective, what colour occupies each display corner:
+// New layout: red=BL, green=BR, blue=TL, gold=TR
 const PERSP_CORNERS={
-  red:  {tl:'blue',  tr:'green', bl:'red',  br:'gold'},
-  gold: {tl:'green', tr:'blue',  bl:'gold', br:'red'},
-  blue: {tl:'red',   tr:'gold',  bl:'blue', br:'green'},
-  green:{tl:'gold',  tr:'red',   bl:'green',br:'blue'},
+  red:  {tl:'blue',  tr:'gold',  bl:'red',   br:'green'},
+  green:{tl:'gold',  tr:'blue',  bl:'green', br:'red'},
+  blue: {tl:'red',   tr:'green', bl:'blue',  br:'gold'},
+  gold: {tl:'green', tr:'red',   bl:'gold',  br:'blue'},
 };
 
 function updCornerNames(){
@@ -1545,8 +1528,11 @@ async function commitMove(move,promo){
       newCaptures[myColor]=Object.fromEntries(existing.map((p,i)=>[i,p]));
     }
 
+    const boardObj={};
+    newBoard.forEach((v,i)=>{if(v!==null)boardObj[String(i)]=v;});
+
     await update(ref(db2,`rooms/${roomId}`),{
-      board:newBoard,
+      board:boardObj,
       currentTurn:winner?null:nextColor,
       turnIndex:nextIdx,
       castlingRights:newCR,
@@ -1558,11 +1544,12 @@ async function commitMove(move,promo){
       gameStarted:true,
       captures:newCaptures,
     });
-    // Store board snapshot + elim state for move history browsing
-    const boardSnap=newBoard.map(p=>p?{type:p.type,color:p.color}:null);
+    // Store board snapshot for move history
+    const boardSnap={};
+    newBoard.forEach((p,i)=>{if(p)boardSnap[String(i)]={type:p.type,color:p.color};});
     await push(ref(db2,`rooms/${roomId}/moveLog`),{
       notation:note,color:myColor,ts:Date.now(),
-      board:boardSnap, elim:newElim,
+      board:boardSnap,elim:newElim,
       lastMove:{from:move.from,to:move.to,color:myColor}
     });
   }catch(err){
