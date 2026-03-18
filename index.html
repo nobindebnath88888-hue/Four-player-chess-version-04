@@ -696,64 +696,62 @@ function initBoard(){
   const P = (r,c,t,co) => { b[r*8+c] = {type:t,color:co}; };
 
   // =========================
-  // TOP LEFT: White
+  // TOP LEFT → WHITE
   // =========================
-  P(0,0,'K','white');
-  P(0,1,'N','white');
-  P(0,2,'B','white');
-  P(0,3,'Q','white');
-  P(1,0,'P','white');
-  P(1,1,'P','white');
-  P(1,2,'P','white');
-  P(1,3,'P','white');
+  P(0,4,'N','white');
+  P(0,5,'Q','white');
+  P(0,6,'B','white');
+  P(0,7,'K','white');
+
+  P(1,4,'P','white');
+  P(1,5,'P','white');
+  P(1,6,'P','white');
+  P(1,7,'P','white');
+
 
   // =========================
-  // TOP RIGHT: Gold
+  // TOP RIGHT → GOLD
   // =========================
-  P(0,4,'Q','gold');
-  P(0,5,'B','gold');
-  P(0,6,'N','gold');
-  P(0,7,'K','gold');
-  P(1,4,'P','gold');
-  P(1,5,'P','gold');
-  P(1,6,'P','gold');
-  P(1,7,'P','gold');
+  P(0,0,'K','gold');
+  P(0,1,'P','gold');
+
+  P(1,0,'B','gold');
+  P(1,1,'P','gold');
+
+  P(2,0,'Q','gold');
+  P(2,1,'P','gold');
+
+  P(3,0,'N','gold');
+  P(3,1,'P','gold');
+
 
   // =========================
-  // BOTTOM LEFT: Black
+  // BOTTOM LEFT → BLACK
   // =========================
+  P(7,0,'K','black');
+  P(7,1,'B','black');
+  P(7,2,'Q','black');
+  P(7,3,'N','black');
+
   P(6,0,'P','black');
   P(6,1,'P','black');
   P(6,2,'P','black');
   P(6,3,'P','black');
-  P(7,0,'K','black');
-  P(7,1,'N','black');
-  P(7,2,'B','black');
-  P(7,3,'Q','black');
-  
-  // Outer flanking Black pieces (from image)
-  P(5,0,'B','black');
-  P(5,1,'P','black');
-  P(4,0,'Q','black');
-  P(4,1,'P','black');
+
+  P(5,7,'Q','black');
+  P(5,6,'P','black');
+  P(4,7,'N','black');
+  P(4,6,'P','black');
+
 
   // =========================
-  // BOTTOM RIGHT: Red
+  // BOTTOM RIGHT → RED
   // =========================
-  P(6,4,'P','red');
-  P(6,5,'P','red');
   P(6,6,'P','red');
-  P(6,7,'P','red');
-  P(7,4,'Q','red');
-  P(7,5,'B','red');
-  P(7,6,'N','red');
-  P(7,7,'K','red');
+  P(6,7,'B','red');
 
-  // Outer flanking Red pieces (from image)
-  P(5,6,'P','red');
-  P(5,7,'B','red');
-  P(4,6,'P','red');
-  P(4,7,'Q','red');
+  P(7,6,'P','red');
+  P(7,7,'K','red');
 
   return b;
 }
