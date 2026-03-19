@@ -705,23 +705,23 @@ function initBoard(){
   // Team B (diagonal): Blue (TL, faces RIGHT) + Green (BR, faces LEFT)
 
   // Red (Black) — Bottom-Left, horizontal, faces UP
-  // Back rank row 7: K B Q N  |  Pawns row 6
-  P(7,0,'K','red');  P(7,1,'B','red');  P(7,2,'Q','red');  P(7,3,'N','red');
+  // Back rank row 7: K N Q B  |  Pawns row 6
+  P(7,0,'K','red');  P(7,1,'N','red');  P(7,2,'Q','red');  P(7,3,'B','red');
   P(6,0,'P','red');  P(6,1,'P','red');  P(6,2,'P','red');  P(6,3,'P','red');
 
   // Blue (White) — Top-Left, vertical, faces RIGHT
-  // Back rank col 0: K B Q N  |  Pawns col 1
-  P(0,0,'K','blue'); P(1,0,'B','blue'); P(2,0,'Q','blue'); P(3,0,'N','blue');
+  // Back rank col 0: K N Q B  |  Pawns col 1
+  P(0,0,'K','blue'); P(1,0,'N','blue'); P(2,0,'Q','blue'); P(3,0,'B','blue');
   P(0,1,'P','blue'); P(1,1,'P','blue'); P(2,1,'P','blue'); P(3,1,'P','blue');
 
   // Gold — Top-Right, horizontal, faces DOWN
-  // Back rank row 0: N Q B K  |  Pawns row 1
-  P(0,4,'N','gold'); P(0,5,'Q','gold'); P(0,6,'B','gold'); P(0,7,'K','gold');
+  // Back rank row 0: B Q N K  |  Pawns row 1
+  P(0,4,'B','gold'); P(0,5,'Q','gold'); P(0,6,'N','gold'); P(0,7,'K','gold');
   P(1,4,'P','gold'); P(1,5,'P','gold'); P(1,6,'P','gold'); P(1,7,'P','gold');
 
   // Green (Red) — Bottom-Right, vertical, faces LEFT
-  // Back rank col 7: N Q B K  |  Pawns col 6
-  P(4,7,'N','green'); P(5,7,'Q','green'); P(6,7,'B','green'); P(7,7,'K','green');
+  // Back rank col 7: B Q N K  |  Pawns col 6
+  P(4,7,'B','green'); P(5,7,'Q','green'); P(6,7,'N','green'); P(7,7,'K','green');
   P(4,6,'P','green'); P(5,6,'P','green'); P(6,6,'P','green'); P(7,6,'P','green');
 
   return b;
