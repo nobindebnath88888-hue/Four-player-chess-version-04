@@ -862,33 +862,8 @@ function isInCheck(board,color){
   return false;
 }
 
-// Checkmate: player is in check AND every possible move still leaves them in check
-// elimSetForCheck = Set of eliminated colors to use for this board state
-function isCheckmate(board, color, cr, elimSetForCheck){
-  // First must be in check
-  const prev = _elimSet;
-  _elimSet = elimSetForCheck; // temporarily set elimSet for isInCheck calls
-  if(!isInCheck(board, color)){
-    _elimSet = prev;
-    return false;
-  }
-  // Try every legal move — if any one escapes check, not checkmate
-  for(let i=0;i<64;i++){
-    const p=board[i];
-    if(!p||p.color!==color)continue;
-    const r=Math.floor(i/8), c=i%8;
-    const moves=genMoves(board,r,c,color,cr);
-    for(const mv of moves){
-      const nb=applyMove(board,mv,'Q');
-      if(!isInCheck(nb,color)){
-        _elimSet=prev;
-        return false; // found an escape
-      }
-    }
-  }
-  _elimSet=prev;
-  return true; // no escape → checkmate
-}
+// Checkmate disabled — win only by king capture
+function isCheckmate(board, color, cr, elimSetForCheck){ return false; }
 
 function sqName(r,c){return String.fromCharCode(97+c)+(8-r)}
 
@@ -1443,26 +1418,17 @@ async function commitMove(move,promo){
   const newBoard=applyMove(board,move,promo);
   const newCR=updateCR(cr,move,board);
 
-  // Detect eliminations FIRST (king capture OR checkmate) — before computing next turn
+  // Detect eliminations — king capture only (no checkmate)
   const newElim=[...elim];
-  const newElimSet=new Set(newElim); // live set used by isCheckmate/_elimSet during detection
+  const newElimSet=new Set(newElim);
   COLORS.filter(col=>col!==myColor&&!newElim.includes(col)).forEach(col=>{
     if(!isKingAlive(newBoard,col)){
-      // King was physically captured this move
       newElim.push(col);
       newElimSet.add(col);
       const kcName=(GS.players?.[col]?.name||PIECE_COLORS[col]?.label||col);
       SFX.eliminate();
       sysChat(kcName+"'s king was captured — eliminated! ☠");
       showBoardNotif('☠ Eliminated', kcName+"'s king captured", 2500);
-    } else if(isCheckmate(newBoard, col, newCR, newElimSet)){
-      // King is in check with no legal escape
-      newElim.push(col);
-      newElimSet.add(col);
-      const cmName=(GS.players?.[col]?.name||PIECE_COLORS[col]?.label||col);
-      SFX.eliminate();
-      sysChat(cmName+" is in checkmate — eliminated! ☢");
-      showBoardNotif('♟ Checkmate', cmName+' is eliminated', 2500);
     }
   });
 
