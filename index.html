@@ -892,19 +892,24 @@ function deserCR(raw){
 // ── Board View Transforms ─────────────────────────────────────────
 // b2d: board coords → display coords for given perspective
 // d2b: display coords → board coords
+// ── Board View Transforms ─────────────────────────────────────────
+// Split-half team perspective: allies always appear at the bottom, enemies at top.
+// Left half (cols 0-3) and right half (cols 4-7) are independently row-flipped
+// based on which team is viewing, so both teammates land at the bottom row.
+//
+// Team A (Red BL + Gold TR): left half normal, right half rows-flipped
+//   → Red stays at bottom-left, Gold flips to bottom-right
+// Team B (Blue TL + Green BR): left half rows-flipped, right half normal
+//   → Blue flips to bottom-left, Green stays at bottom-right
 function b2d(r,c,p){
-  if(p==='red')   return [r,   c  ];   // bottom-left  identity
-  if(p==='green') return [r,   7-c];   // bottom-right mirror cols
-  if(p==='blue')  return [7-r, c  ];   // top-left     flip rows
-  if(p==='gold')  return [7-r, 7-c];  // top-right    rotate 180
-  return [r,c];
+  const teamA=(p==='red'||p==='gold');
+  if(teamA) return c<4?[r,c]:[7-r,c];
+  else       return c<4?[7-r,c]:[r,c];
 }
 function d2b(dr,dc,p){
-  if(p==='red')   return [dr,   dc  ];
-  if(p==='green') return [dr,   7-dc];
-  if(p==='blue')  return [7-dr, dc  ];
-  if(p==='gold')  return [7-dr, 7-dc];
-  return [dr,dc];
+  const teamA=(p==='red'||p==='gold');
+  if(teamA) return dc<4?[dr,dc]:[7-dr,dc];
+  else       return dc<4?[7-dr,dc]:[dr,dc];
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1248,12 +1253,14 @@ function paint(){
 // Corner name mapping: which colour appears at each display corner
 // for each perspective.  Format: {tl, tr, bl, br}
 const CORNER_CLASS={red:'black-p',blue:'white-p',green:'silver-p',gold:'gold-p'};
-// New layout: red=BL, green=BR, blue=TL, gold=TR (diagonal teams)
+// Split-half view: teammates share same orientation.
+// Team A (Red+Gold): BL=Red(ally), BR=Gold(ally), TL=Blue(enemy), TR=Green(enemy)
+// Team B (Blue+Green): BL=Blue(ally), BR=Green(ally), TL=Red(enemy), TR=Gold(enemy)
 const PERSP_CORNERS={
-  red:  {tl:'blue',  tr:'gold',  bl:'red',   br:'green'},
-  green:{tl:'gold',  tr:'blue',  bl:'green', br:'red'},
-  blue: {tl:'red',   tr:'green', bl:'blue',  br:'gold'},
-  gold: {tl:'green', tr:'red',   bl:'gold',  br:'blue'},
+  red:  {tl:'blue',  tr:'green', bl:'red',  br:'gold'},
+  gold: {tl:'blue',  tr:'green', bl:'red',  br:'gold'},
+  blue: {tl:'red',   tr:'gold',  bl:'blue', br:'green'},
+  green:{tl:'red',   tr:'gold',  bl:'blue', br:'green'},
 };
 
 function updCornerNames(){
